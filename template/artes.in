@@ -1,0 +1,91 @@
+======================================================================
+* ARTES input parameters
+
+----------------------------------------------------------------------
+* General
+
+* Write log file (on) or screen output (off)
+general:log=off
+
+* Send e-mail when finished
+general:email=
+
+----------------------------------------------------------------------
+* Photons
+
+* Photon source (star, planet)
+photon:source=star
+
+* Photon stopping parameter (0-1)
+photon:fstop=1d-5
+
+* Minimum photon energy (<=1), otherwise removed after scattering
+photon:minimum=1d-20
+
+* Weight cell luminosity, equal photons emitted from all cells (on/off)
+photon:weight=on
+
+* Photon scattering (on/off)
+photon:scattering=on
+
+* Thermal photon emission direction (isotropic/biased)
+photon:emission=isotropic
+
+* Biased emission asymmetry parameter (0 <= bias < 1)
+photon:bias=0.8
+
+----------------------------------------------------------------------
+* Star
+
+* Stellar temperature [K]
+star:temperature=5800
+
+* Stellar radius [R:sun]
+star:radius=1
+
+* Stellar direction [degrees]
+star:direction=off
+star:theta=
+star:phi=
+
+----------------------------------------------------------------------
+* Planet
+
+* Surface albedo (black=0, lambert=1)
+planet:surface_albedo=0
+
+* Oblateness (0-1)
+planet:oblateness=0
+
+* Orbital radius [au]
+planet:orbit=5
+
+* Circumplanetary ring (on/off)
+planet:ring=off
+
+----------------------------------------------------------------------
+* Detector
+
+* Observation mode (spectrum, phase, imaging_mono, imaging_broad)
+detector:type=imaging_mono
+
+* Detector location [degrees]
+detector:theta=90
+detector:phi=90
+
+* Number of detector pixels in x and y direction
+detector:pixel=25
+
+* Distance [pc]
+detector:distance=10
+
+----------------------------------------------------------------------
+* Output
+
+* Global energy flow (on/off)
+output:flow_global=off
+
+* Latitudinal energy flow (on/off)
+output:flow_latitudinal=off
+
+======================================================================

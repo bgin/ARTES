@@ -1,0 +1,174 @@
+================================================================
+                  _     ___   _____   ___   ___ 
+                 /_\   | _ \ |_   _| | __| / __|
+                / _ \  |   /   | |   | _|  \__ \
+               /_/ \_\ |_|_\   |_|   |___| |___/
+
+      Atmospheric Radiative Transfer for Exoplanet Science
+
+                          Developed by:
+		   
+                          Tomas Stolker
+                      T.Stolker [at] uva.nl
+
+            Anton Pannekoek Institute for Astronomy
+
+----------------------------------------------------------------
+
+           Please cite Stolker et al. 2017 whenever
+           ARTES results are used in a publication.
+
+----------------------------------------------------------------
+--> Compile ARTES
+
+ARTES has to be compiled with the GNU Fortran compiler which
+can be installed with:
+
+Mac:     brew install gcc
+Linux:   sudo apt-get install gfortran
+
+Add the following line (with the correct path) to the
+~/.bash_profile (Mac) or ~/.bashrc (Linux) file:
+
+Mac:     export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:$HOME/ARTES/lib"
+Linux    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/ARTES/lib"
+
+And compile ARTES with:
+
+Mac:     make
+Linux:   make linux=true
+
+----------------------------------------------------------------
+
+--> ARTES input structure
+
+All input files have to be located in the input folder of which
+the required file structure is the following:
+
+  ARTES/input/[atmosphere]/atmosphere.in
+  ARTES/input/[atmosphere]/artes.in
+  ARTES/input/[atmosphere]/pressureTemperature.dat (optional)
+  ARTES/input/[atmosphere]/opacity/[opacityFITS]
+
+Where [atmosphere] is the user-defined model name.
+
+----------------------------------------------------------------
+--> Pressure-temperature profile
+
+A pressure-temperature profile can be provided in the
+[atmosphere] folder, name pressureTemperature.in, which is used
+by ARTES to determine the gas densities, mixing ratios, and 
+absorption cross sections. The profile should be given in
+units of [bar] and [K] with increasing pressure.
+
+----------------------------------------------------------------
+--> Create opacity files
+
+Several type of opacity sources can be generated for both gas
+and cloud particles. The opacity and scattering properties
+need to be provided in a FITS file with the first FITS extension
+containing the wavelength dependent extinction, absorption and
+scattering opacity and the second extension containing the
+16-element scattering matrices.
+
+The python folder contains some helpful tools:
+
+   1. opacityHenyeyGreenstein.py
+      Generates Henyey-Greenstein scattering opacities with
+      a constant absorption coefficient.
+
+   2. opacityRayleigh.py
+      Generates Rayleigh scattering opacities with a constant
+      single scattering albedo.
+
+   3. opacityGas.py
+      Generates gas opacities with Rayleigh scattering cross-
+      section and wavelength dependent absorption coefficients.
+
+   4. opacityMolecules.py
+      Generates pressure temperature dependent gas opacities
+      with equilibrium chemistry volume mixing ratios.
+
+   5. opacityMie.py
+      Generates Mie opacities and scattering matrices that can
+      be used for cloud and haze particles. This wrapper
+      calls the ComputePart code which is developed by
+      Michiel Min (SRON). Make sure that the ComputePart
+      binary file is executable:
+
+        chmod 700 bin/ComputePart[Mac/Linux]
+        
+      In case a segmentation fault appears when running this
+      routine, then try:
+      
+        ulimit -s unlimited
+
+All opacity FITS files should be located in the opacity folder.
+
+----------------------------------------------------------------
+--> Create atmosphere.in file
+
+The atmosphere.in file has to be located in the [atmosphere]
+folder and its content should look something like:
+
+----
+
+; Example atmosphere.in file
+
+[grid]
+radius: 1.
+radial: 100., 200.
+theta: 60., 120. 
+phi:
+
+[composition]
+fits01: gas.fits
+fits02: clouds.fits
+opacity01: 1, 1.e-3, 0, nr, 0, ntheta, 0, nphi
+opacity02: 2, 1.e-1, 0, nr, 1, 2, 0, nphi
+
+----
+
+The [grid] part contains the grid structure of the atmosphere.
+Radial, polar and azimuthal grid faces can be added. Radial
+cell boundaries are given in [km] and polar and azimuthal
+boundaries are given in [deg].
+
+The [composition] part contains a list of all the opacity FITS
+files that are used and are present in the opacity folder.
+Numbered from one up, with single digit numbers with a prior
+zero. The opacity keywords specify which opacity sources belong
+to which grid cells. The value order is:
+
+   [ fits, density [g cm-3], rIn, rOut,
+                 thetaIn, thetaOut, phiIn, phiOut ]
+
+Fits gives the corresponding FITS file number, density the grid
+cell density, rIn/rOut the inner and outer radial grid cell
+face and the same for theta and phi. The outer most boundaries
+are given by nr, ntheta, nphi.
+
+Furthermore, a surface gravity [m/s2] and mean molecular weight
+[g/mol] have to be specified in case a pressure temperature
+profile is given to set up the radial grid structure.
+
+----------------------------------------------------------------
+--> Create artes.in file
+
+This file contains the input parameters for ARTES. Please check
+the artes.in template file which has a full description of all
+the keywords. Command line keywords can be provided with the
+'-k' flag which will overrule the input file keyword.
+
+----------------------------------------------------------------
+--> Run ARTES
+
+Two steps are required:
+
+  1. Build atmospheric structure:
+     python python/atmosphere.py [atmosphereName]
+
+  2. Run ARTES:
+     ./bin/ARTES [atmosphere] [photons] -o [outputDirectory] -k [keyWord]=[value]
+
+================================================================
